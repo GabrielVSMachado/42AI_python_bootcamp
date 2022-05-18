@@ -1,12 +1,74 @@
+from functools import reduce
+
+
 class Vector:
     """
     A class representing a vector with one column or one row
     """
 
+    def __constructors(__init__):
+        """
+        Implement one constructor to which type kind receive
+        @param: __init__: function __init__ from Vector
+        return: function to check type of the second argument
+        """
+        def constructor_size(*args):
+            """
+            Constructor when args[1] is a integer number
+            @param: *args: arguments passed to __init__
+            return: the call of __init__ function with args[1] equal a
+            array of arrays
+            """
+            values = [[i] for i in range(args[1])]
+            return __init__(args[0], values)
+
+        def constructor_tuple(*args):
+            """
+            Constructor when args[1] is a tuple
+            @param: *args: arguments passed to __init__
+            return: the call of __init__ function with values equal a
+            a nested array with elements in the range of args[1][0]
+            to args[1][1] not inclusive
+            """
+            if args[1][0] > args[1][1]:
+                raise(ValueError(
+                    "The second value of range must be greater than the first")
+                )
+            values = [[i] for i in range(*args[1])]
+            return __init__(args[0], values)
+
+        def constructor_array(*args):
+            """
+            Constructor when args[1] is a array
+            @param: *args: arguments passed to __init__ function
+            return: call __init__ with arguments unchanged
+            """
+            return __init__(*args)
+
+        def check_type(*args):
+            """
+            Check the type of the second argument
+            @param: *args: every args receive from __init__
+            return: the corresponding constructor of the received type
+            """
+            if type(args[1]) == int:
+                return constructor_size(*args)
+            elif type(args[1]) == tuple:
+                return constructor_tuple(*args)
+            return constructor_array(*args)
+        return check_type
+
+    @__constructors
     def __init__(self, values):
         self.values = values
         n_rows = len(values)
         self.shape = (1, len(*values)) if n_rows == 1 else (n_rows, 1)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return str(self.values)
 
     def __mul__(self, other) -> object:
         """Implement multiplication between a vector object and a scalar number
@@ -55,6 +117,9 @@ class Vector:
         """
         return self + (other * -1)
 
+    def __rsub__(self, other):
+        return other + (self * -1)
+
     def __truediv__(self, other):
         """
         Implement division of one vector by a scalar number;
@@ -64,22 +129,33 @@ class Vector:
         """
         return self * (1 / other)
 
-    def __rtruediv(self, other):
-        raise(ArithmeticError)
+    def __rtruediv__(self, other):
+        raise(NotImplementedError)
 
     def dot(self, other):
         """
-        Calculate the dot product of two vectors
+        Calculate the dot product of two vectors with same shape
         @param: self: a vector object;
         @param: other: a vector object;
         return: a float.
         """
-        pass
+        if self.shape != other.shape:
+            raise(NotImplementedError(
+                "Only implemented dot product of vectors with same shape"))
+        if self.shape[0] == 1:
+            return reduce(
+                lambda x, y: x + y[0] * y[1],
+                zip(*self.values, *other.values), 0)
+        return reduce(
+            lambda x, y: x + y[0][0] * y[1][0],
+            zip(self.values, other.values), 0)
 
     def T(self):
         """
         Calculate the transpose vector.
         @param: self: the vector;
-        return: a new vector who is the transpose of self
+        return: a new vector whom is the transpose of self
         """
-        pass
+        if self.shape[0] == 1:
+            return self.__class__([*map(lambda x: [x], *self.values)])
+        return self.__class__([reduce(lambda x, y: x + y, self.values)])
