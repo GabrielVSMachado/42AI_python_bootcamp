@@ -1,68 +1,44 @@
-from functools import reduce
+from functools import reduce, singledispatchmethod
 
 
-class Vector:
+class Vector(object):
     """
     A class representing a vector with one column or one row
     """
-
-    def __constructors(__init__):
-        """
-        Implement one constructor to which type kind receive
-        @param: __init__: function __init__ from Vector
-        return: function to check type of the second argument
-        """
-        def constructor_size(*args):
-            """
-            Constructor when args[1] is a integer number
-            @param: *args: arguments passed to __init__
-            return: the call of __init__ function with args[1] equal a
-            array of arrays
-            """
-            values = [[i] for i in range(args[1])]
-            return __init__(args[0], values)
-
-        def constructor_tuple(*args):
-            """
-            Constructor when args[1] is a tuple
-            @param: *args: arguments passed to __init__
-            return: the call of __init__ function with values equal a
-            a nested array with elements in the range of args[1][0]
-            to args[1][1] not inclusive
-            """
-            if args[1][0] > args[1][1]:
-                raise(ValueError(
-                    "The second value of range must be greater than the first")
-                )
-            values = [[i] for i in range(*args[1])]
-            return __init__(args[0], values)
-
-        def constructor_array(*args):
-            """
-            Constructor when args[1] is a array
-            @param: *args: arguments passed to __init__ function
-            return: call __init__ with arguments unchanged
-            """
-            return __init__(*args)
-
-        def check_type(*args):
-            """
-            Check the type of the second argument
-            @param: *args: every args receive from __init__
-            return: the corresponding constructor of the received type
-            """
-            if type(args[1]) == int:
-                return constructor_size(*args)
-            elif type(args[1]) == tuple:
-                return constructor_tuple(*args)
-            return constructor_array(*args)
-        return check_type
-
-    @__constructors
+    @singledispatchmethod
     def __init__(self, values):
+        """
+        Constructor when values is a array
+        @param: *args: arguments passed to __init__ function
+        return: call __init__ with arguments unchanged
+        """
         self.values = values
         n_rows = len(values)
         self.shape = (1, len(*values)) if n_rows == 1 else (n_rows, 1)
+
+    @__init__.register(tuple)
+    def _(self, values: tuple):
+        """
+        Constructor when values is a tuple
+        @param: *args: arguments passed to __init__
+        return: None
+        """
+        if values[1][0] > values[1][1]:
+            raise(ValueError(
+                "The second value of range must be greater than the first")
+            )
+        self.values = [[i] for i in range(*values)]
+        self.shape = (len(self.values), 1)
+
+    @__init__.register(int)
+    def _(self, values: int):
+        """
+        Constructor when values is a integer number
+        @param: *args: arguments passed to __init__
+        return: None
+        """
+        self.values = [[i] for i in range(values)]
+        self.shape = (len(self.values), 1)
 
     def __repr__(self):
         return self.__str__()

@@ -86,3 +86,9 @@ def test_transposte_of_column_vector():
     result = Vector([[1], [2], [3]]).T()
     expected = Vector([[1, 2, 3]])
     assert result.values == expected.values
+
+
+def test_create_with_size():
+    result = Vector(4)
+    expected = Vector([[0], [1], [2], [3]])
+    assert result.values == expected.values
